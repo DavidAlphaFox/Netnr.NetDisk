@@ -7,7 +7,7 @@ namespace Netnr.NetDisk.Controllers
     {
         public IActionResult Index()
         {
-            return Redirect("/" + GlobalTo.GetValue("index"));
+            return Redirect(GlobalTo.GetValue("path:index"));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
