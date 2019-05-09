@@ -24,6 +24,9 @@ namespace Netnr.NetDisk
             {
                 db.Database.EnsureCreated();
             }
+
+            //初始化
+            new Func.Support().Init();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
