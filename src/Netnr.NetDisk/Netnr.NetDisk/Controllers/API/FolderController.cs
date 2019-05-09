@@ -6,6 +6,7 @@ namespace Netnr.NetDisk.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
+    [FilterConfigs.AuthFilter]
     public class FolderController : ControllerBase
     {
         // GET: api/Folder

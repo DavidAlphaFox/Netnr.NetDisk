@@ -43,8 +43,8 @@ namespace Netnr.NetDisk
                 //注册全局错误过滤器
                 options.Filters.Add(new FilterConfigs.ErrorActionFilter());
 
-                //注册全局日志过滤器
-                options.Filters.Add(new FilterConfigs.LogActionAttribute());
+                //注册全局过滤器
+                options.Filters.Add(new FilterConfigs.GlobalFilter());
             });
 
             //授权访问信息

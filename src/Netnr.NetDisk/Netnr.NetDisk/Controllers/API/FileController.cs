@@ -8,6 +8,7 @@ namespace Netnr.NetDisk.Controllers.API
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [FilterConfigs.AuthFilter]
     public class FileController : ControllerBase
     {
         // GET: api/File

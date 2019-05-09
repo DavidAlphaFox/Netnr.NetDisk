@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Netnr.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,12 +9,6 @@ namespace Netnr.NetDisk
 {
     /// <summary>
     /// 过滤器
-    /// 
-    /// 能 实现一个过滤器接口，要么是同步版本的，要么是异步版本的，鱼和熊掌不可兼得 。
-    /// 如果你需要在接口中执行异步工作，那么就去实现异步接口。否则应该实现同步版本的接口。
-    /// 框架会首先检查是不是实现了异步接口，如果实现了异步接口，那么将调用它。
-    /// 不然则调用同步接口的方法。如果一个类中实现了两个接口，那么只有异步方法会被调用。
-    /// 最后，不管 action 是同步的还是异步的，过滤器的同步或是异步是独立于 action 的
     /// </summary>
     public class FilterConfigs
     {
@@ -74,13 +69,21 @@ namespace Netnr.NetDisk
         }
 
         /// <summary>
-        /// 全局日志记录
+        /// 全局过滤器
         /// </summary>
-        public class LogActionAttribute : ActionFilterAttribute
+        public class GlobalFilter : ActionFilterAttribute
         {
             public override void OnActionExecuting(ActionExecutingContext context)
             {
                 var hc = context.HttpContext;
+
+                //支持跨域
+                if (GlobalTo.GetValue<bool>("safe:apicors"))
+                {
+                    hc.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                }
+
+                //日志记录
                 try
                 {
                     string controller = context.RouteData.Values["controller"].ToString().ToLower();
@@ -113,6 +116,61 @@ namespace Netnr.NetDisk
                 }
                 catch (Exception)
                 {
+                }
+            }
+        }
+
+        /// <summary>
+        /// 授权访问
+        /// </summary>
+        public class AuthFilter : Attribute, IActionFilter
+        {
+            public void OnActionExecuted(ActionExecutedContext context)
+            {
+
+            }
+
+            public void OnActionExecuting(ActionExecutingContext context)
+            {
+                var isAuth = false;
+
+                var hc = context.HttpContext;
+
+                try
+                {
+                    if (hc.User.Identity.IsAuthenticated)
+                    {
+                        isAuth = true;
+                    }
+                    else
+                    {
+                        var token = hc.Request.Headers["token"].ToString();
+
+                        //token验证
+                        if (!string.IsNullOrWhiteSpace(token))
+                        {
+                            using (var db = new ContextBase())
+                            {
+                                var ut = db.UserToken.Where(x => x.UtToken == token).FirstOrDefault();
+                                if ((DateTime.Now - ut?.UtTokenTime)?.TotalMinutes <= GlobalTo.GetValue<int>("safe:tokenexpiredate"))
+                                {
+                                    isAuth = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Core.ConsoleTo.Log(ex);
+                }
+
+                if (!isAuth)
+                {
+                    hc.Response.StatusCode = 401;
+
+                    var msg = System.Text.Encoding.Default.GetBytes("Unauthorized");
+                    hc.Response.Body.Write(msg, 0, msg.Length);
                 }
             }
         }

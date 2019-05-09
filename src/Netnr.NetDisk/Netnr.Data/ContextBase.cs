@@ -86,6 +86,7 @@ namespace Netnr.Data
 
         public virtual DbSet<FileRecord> FileRecord { get; set; }
         public virtual DbSet<FileSetting> FileSetting { get; set; }
+        public virtual DbSet<UserToken> UserToken { get; set; }
         public virtual DbSet<UserInfo> UserInfo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -119,9 +120,9 @@ namespace Netnr.Data
             modelBuilder.Entity<UserToken>(entity =>
             {
                 entity.HasKey(e => e.UtAppId);
-                entity.Property(e => e.UtAppId).HasMaxLength(50);
-                entity.Property(e => e.UtAppKey).HasMaxLength(50);
-                entity.Property(e => e.UtToken).HasMaxLength(50);
+                entity.Property(e => e.UtAppId).HasMaxLength(50).IsUnicode();
+                entity.Property(e => e.UtAppKey).HasMaxLength(50).IsUnicode();
+                entity.Property(e => e.UtToken).HasMaxLength(50).IsUnicode();
                 entity.Property(e => e.UtTokenTime).HasColumnType("datetime");
                 entity.Property(e => e.UtPermission).HasMaxLength(500);
                 entity.Property(e => e.UtCreateTime).HasColumnType("datetime");
